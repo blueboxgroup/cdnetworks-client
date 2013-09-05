@@ -1,8 +1,9 @@
 # Cdnetworks Client
 
-The Cdnetworks Client is a simple wrapper for two [Cdnetworks](http://www.cdnetworks.com/) APIs
+The Cdnetworks Client is a simple wrapper for three [Cdnetworks](http://www.cdnetworks.com/) APIs
 * Config Open API v1.0
-* Cache Purge Open API v2.0
+* Cache Purge Open API v2.0 (older cache flushing API)
+* Cache Flush Open API v2.3.2 (most current cache flushing API)
 
 This gem allows a user to call methods from either of these APIs using the same syntax.
 
@@ -74,6 +75,18 @@ You can also add in parameters
 </pre>
 
 ## Purging a cache
+
+### If you are using Cache Flush Open API v2.3.2
+
+<pre>
+  cdn.do_purge(:pad => "cdn.example.com", :type => "all")
+</pre>
+
+<pre>
+  cdn.do_purge(:pad => "cdn.example.com", :path => ["images/one.jpg", "images/two.jpg"])
+</pre>
+
+### If you are using Cache Purge Open API v2.0
 <pre>
   cdn.execute_cache_purge(:purgeUriList => "cdn.example.com")
 </pre>
@@ -82,7 +95,19 @@ You can also add in parameters
   cdn.execute_cache_purge(:purgeUriList => ["cdn.example.com", "cdn.foo.com"])
 </pre>
 
+## Getting the status of a cache purge
+<pre>
+  cdn.status(:pid => 1234)
+</pre>
+
 ## Listing all PAD domain names
+
+### If you are using Cache Flush Open API v2.3.2
+<pre>
+  cdn.pad_list
+</pre>
+
+### If you are using Cache Purge Open API v2.0
 <pre>
   cdn.get_cache_domain_list
 </pre>

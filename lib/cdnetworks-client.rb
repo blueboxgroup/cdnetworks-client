@@ -1,10 +1,12 @@
 require "cdnetworks-client/version"
 require "cdnetworks-client/cache_purge_api"
 require "cdnetworks-client/config_open_api"
+require "cdnetworks-client/cache_flush_open_api"
 
 class CdnetworksClient
   include ConfigOpenApi
   include CachePurgeApi
+  include CacheFlushOpenApi
 
 
   def initialize(credentials={})
@@ -24,7 +26,7 @@ class CdnetworksClient
       response = http.request(compose_request(path,options))
       response_hash = { code: response.code, body: response.body }
     rescue StandardError=>e
-      puts "An error has occurred connecting to the CDNetworks API (#{e})"
+      "An error has occurred connecting to the CDNetworks API (#{e})"
     end
   end
 
