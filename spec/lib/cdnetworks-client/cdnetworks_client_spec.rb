@@ -445,6 +445,13 @@ describe CdnetworksClient do
         it "returns bandwidth usage for a given time period" do
           expect(@cdn_api.bandwidth_usage @fake_service, start_time, end_time).to eq expected_bandwidth
         end
+
+        it "returns 0 for service with no traffic in given range (cdnetworks returns 404)" do
+          resp = JSON.pretty_unparse(trafficResponse: {returnCode: 404})
+          stub_request(:post, "#{@url}/api/rest/traffic/edge").to_return(body: resp)
+
+          expect(@cdn_api.bandwidth_usage @fake_service, start_time, end_time).to eq(0)
+        end
       end
     end
 

@@ -21,7 +21,7 @@ module StatisticsOpenApi
     response = call(BANDWIDTH_PATH, opts)
 
     if response[:code].to_s == "404"
-      nil
+      0.0
     else
       Array.wrap(response[:body]['trafficResponse']['trafficItem']).map{|i| i['dataTransferred']}.inject(&:+)
     end
