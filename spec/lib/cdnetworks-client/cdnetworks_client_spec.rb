@@ -373,7 +373,9 @@ describe CdnetworksClient do
 
       before do
         @good_token, _ = stub_auth_calls
-        stub_request(:post, "#{@url}/api/rest/getApiKeyList").with(body: {"output"=>"json", "sessionToken"=>bad_token}).to_return(body: expired_session_resp)
+        stub_request(:post, "#{@url}/api/rest/getApiKeyList")
+          .with(body: {"output"=>"json", "sessionToken"=>bad_token})
+          .to_return(body: expired_session_resp)
       end
 
       it "re-establishes session if it expires" do
@@ -384,16 +386,32 @@ describe CdnetworksClient do
       end
 
       it "doesn't infinite loop if session can't be re-established" do
-        stub_request(:post, "#{@url}/api/rest/login").to_return(body: JSON.pretty_unparse(loginResponse: {resultCode: 101}))
+        stub_request(:post, "#{@url}/api/rest/login")
+          .to_return(body: JSON.pretty_unparse(loginResponse: {resultCode: 101}))
         expect { @cdn_api.get_api_key_list(bad_token) }.to raise_error(OpenApiError::ApiError)
       end
 
       it "gives up if session is not re-established after MAX_SESSION_RETRIES tries" do
-        stub_request(:post, "#{@url}/api/rest/getApiKeyList").with(body: {"output"=>"json", "sessionToken"=>@good_token}).to_return(body: expired_session_resp)
+        stub_request(:post, "#{@url}/api/rest/getApiKeyList")
+          .with(body: {"output"=>"json", "sessionToken"=>@good_token})
+          .to_return(body: expired_session_resp)
 
         expect { @cdn_api.get_api_key_list(bad_token) }.to raise_error(OpenApiError::CriticalApiError)
 
         expect(a_request(:post, "#{@url}/api/rest/login")).to have_been_made.times(3)
+      end
+
+      it "keeps code andy body around on the exception" do
+        response = JSON.pretty_unparse(loginResponse: { resultCode: 101 })
+        stub_request(:post, "#{@url}/api/rest/login")
+          .to_return(body: response)
+
+        begin
+          @cdn_api.get_api_key_list(bad_token)
+        rescue OpenApiError::ApiError => e
+          expect(e.code).to eq(101)
+          expect(e.body).to eq(response)
+        end
       end
     end
 
