@@ -11,21 +11,30 @@ module OpenApiError
     "999" => "Temporary error"
   }
 
-  class ApiError < StandardError
+  class BaseError < StandardError
+    attr_accessor :code, :body
 
+    def initialize(error, code = nil, body = nil)
+      @code = code
+      @body = body
+      super(error)
+    end
   end
 
-  class CriticalApiError < StandardError
+  class ApiError < BaseError
+  end
 
+  class CriticalApiError < BaseError
   end
 
   class ErrorHandler
     def self.handle_error_response(code, body)
-      if desc = ERROR_CODES[code.to_s]
-        raise ApiError.new("Open API Error #{code}: #{desc}")
+      if ERROR_CODES[code.to_s]
+        message = "Open API Error #{code}: #{ERROR_CODES[code.to_s]}"
       else
-        raise ApiError.new("Unknown Open API Response Code #{code} (body: #{body})")
+        message = "Unknown Open API Response Code #{code} (body: #{body})"
       end
+      raise ApiError.new(message, code, body)
     end
   end
 end
